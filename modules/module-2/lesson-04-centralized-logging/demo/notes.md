@@ -16,28 +16,51 @@
 
 ```bash
 cd k3s-setup/
-./setup-k3s.sh
+k3d cluster create --config multi-node.yaml
 ```
 
 ### 2. Установка PLG стека через Helm
+
+https://grafana.com/docs/loki/latest/setup/install/helm/install-monolithic/
 
 ```bash
 # Добавляем репозитории Helm
 helm repo add grafana https://grafana.github.io/helm-charts
 helm repo update
 
-# Устанавливаем Loki
-helm install loki grafana/loki-stack -f loki/values.yaml
-
-# Устанавливаем Grafana
-helm install grafana grafana/grafana -f grafana/values.yaml
+# Устанавливаем Loki и Grafana
+helm upgrade --install \
+    loki grafana/loki \
+    --create-namespace \
+    --namespace logs \
+    --values loki/values.yaml
 ```
 
-### 3. Настройка Promtail
+* Get loki password
+    ```bash
+    passw=$(kubectl get secret --namespace logs loki-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo)
+    printf "L: admin\nP: %s\n" "$passw"
+    ```
 
-```bash
-kubectl apply -f promtail/
-```
+
+* Share traffic to test Loki 3100 port
+    ```bash
+    kubectl port-forward svc/loki-gateway 3100:3100 -n logs
+    ```
+
+* Verify that Loki did receive the data using the following command:
+    ```bash
+    curl -H "Content-Type: application/json" -XPOST -s "http://127.0.0.1:3100/loki/api/v1/push"  \
+    --data-raw "{\"streams\": [{\"stream\": {\"job\": \"test\"}, \"values\": [[\"$(date +%s)000000000\", \"fizzbuzz\"]]}]}"
+    ```
+
+* More complex log message
+    ```bash
+    url="https://10b1-94-19-17-241.ngrok-free.app"
+    curl -H "Content-Type: application/json" -XPOST -s "$url/loki/api/v1/push"  \
+    --data-raw "{\"streams\": [{\"stream\": {\"job\": \"external\"}, \"values\": [[\"$(date +%s)000000000\", \"$(whoami);$(pwd) logs\"]]}]}"
+    ```
+
 
 ## 📊 Доступ к Grafana
 
