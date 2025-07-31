@@ -1,0 +1,17 @@
+# Simple single-node k3d cluster configuration
+# See https://k3d.io/v5.8.3/usage/configfile/#all-options-example
+apiVersion: k3d.io/v1alpha5
+kind: Simple
+metadata:
+  name: otus-demo
+servers: 1
+agents: 0
+image: rancher/k3s:v1.33.3-k3s1
+ports:
+  - port: 6443:6443 # Kubernetes API
+options:
+  k3s:
+    nodeLabels:
+      - label: foo=bar # same as `--k3s-node-label 'foo=bar@agent:1'` -> this results in a Kubernetes node label
+        nodeFilters:
+          - server:*
