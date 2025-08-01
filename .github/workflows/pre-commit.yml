@@ -4,10 +4,10 @@ name: Pre-commit
 on:
   push:
     branches:
-      - true
+      - main
   pull_request:
     branches:
-      - true
+      - main
 
 jobs:
   pre-commit:
