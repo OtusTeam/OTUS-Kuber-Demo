@@ -16,7 +16,7 @@ repos:
       - id: check-executables-have-shebangs
       - id: check-shebang-scripts-are-executable
 
-  - repo: git@github.com:antonbabenko/pre-commit-terraform.git
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
     rev: v1.99.5
     hooks:
       - id: terraform_fmt
