@@ -1,0 +1,38 @@
+# Multi-node k3d cluster configuration
+# See https://k3d.io/v5.8.3/usage/configfile/#all-options-example
+apiVersion: k3d.io/v1alpha5
+kind: Simple
+metadata:
+  name: otus-demo-lb
+servers: 1
+agents: 2
+image: rancher/k3s:v1.33.3-k3s1
+ports:
+  - port: 6443:6443 # Kubernetes API
+  - port: 8080:80 # HTTP
+    nodeFilters:
+        - loadbalancer
+  - port: 8443:443 # HTTPS
+    nodeFilters:
+        - loadbalancer
+  - port: 30080:30080 # NodePort example
+options:
+  k3d:
+    wait: true
+    timeout: "360s" # should be pretty high for multi-server clusters to allow for a proper startup routine
+    disableLoadbalancer: false
+    disableImageVolume: false
+  k3s:
+    extraArgs:
+      - arg: --tls-san=127.0.0.1
+        nodeFilters:
+          - server:*
+  kubeconfig:
+    updateDefaultKubeconfig: true
+    switchCurrentContext: true
+  runtime:
+    labels:
+      - label: foo=bar
+        nodeFilters:
+          - server:0
+          - loadbalancer

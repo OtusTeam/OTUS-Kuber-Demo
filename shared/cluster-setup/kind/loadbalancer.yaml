@@ -1,0 +1,25 @@
+# Cluster with LoadBalancer support using MetalLB
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: otus-demo
+nodes:
+  - role: control-plane
+    image: kindest/node:v1.33.2
+    extraPortMappings:
+      - containerPort: 80
+        hostPort: 8080
+        protocol: TCP
+      - containerPort: 443
+        hostPort: 8443
+        protocol: TCP
+  - role: worker
+    image: kindest/node:v1.33.2
+  - role: worker
+    image: kindest/node:v1.33.2
+networking:
+  apiServerAddress: "127.0.0.1"
+  apiServerPort: 6443
+  # WARNING: It is _strongly_ recommended that you keep this the default
+  # (172.18.0.0/16) for security reasons. However it is possible to change this.
+  podSubnet: "10.244.0.0/16"
+  serviceSubnet: "10.96.0.0/16"

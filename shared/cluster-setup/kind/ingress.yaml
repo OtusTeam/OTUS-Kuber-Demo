@@ -1,0 +1,29 @@
+# Cluster configuration with Ingress support
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: otus-demo
+nodes:
+  - role: control-plane
+    image: kindest/node:v1.33.2
+    kubeadmConfigPatches:
+      - |
+        kind: InitConfiguration
+        nodeRegistration:
+          kubeletExtraArgs:
+            node-labels: "ingress-ready=true"
+    extraPortMappings:
+      # expose port 80 for HTTP ingress
+      - containerPort: 80
+        hostPort: 80
+        protocol: TCP
+      # expose port 443 for HTTPS ingress
+      - containerPort: 443
+        hostPort: 443
+        protocol: TCP
+  - role: worker
+    image: kindest/node:v1.33.2
+  - role: worker
+    image: kindest/node:v1.33.2
+networking:
+  apiServerAddress: "127.0.0.1"
+  apiServerPort: 6443
