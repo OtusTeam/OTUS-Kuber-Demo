@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: datascrapper
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      application: datascraper
+  template:
+    metadata:
+      annotations:
+        instrumentation.opentelemetry.io/inject-python: "true"
+        instrumentation.opentelemetry.io/otel-python-platform: "glibc" # for Linux glibc based images, this is the default value and can be omitted
+        # instrumentation.opentelemetry.io/otel-python-platform: "musl"
+      labels:
+        application: datascraper
+    spec:
+      serviceAccountName: datacrapper-account
+      containers:
+        - name: data-scrapper
+          image: windblow/demo-data-scraper:0.1.0
+          imagePullPolicy: Always
