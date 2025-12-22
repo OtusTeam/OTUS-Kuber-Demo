@@ -44,4 +44,3 @@ flux bootstrap gitlab --hostname=gitlab.com --owner=w1ndblow --repository=flux -
 ```
 
 Оправить изменения в gitlab и смотреть за результатом
-
