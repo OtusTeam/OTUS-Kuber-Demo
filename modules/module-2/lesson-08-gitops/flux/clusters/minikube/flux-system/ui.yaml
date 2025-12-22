@@ -1,0 +1,32 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: ww-gitops
+  namespace: flux-system
+spec:
+  type: "oci"
+  interval: 1m0s
+  url: oci://ghcr.io/weaveworks/charts
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: weave-gitops
+  namespace: flux-system
+spec:
+  interval: 5m
+  chart:
+    spec:
+      chart: weave-gitops # Name of the chart in the repository
+      sourceRef:
+        kind: HelmRepository
+        name: ww-gitops # Name of the HelmRepository resource defined above
+  values:
+    adminUser:
+      create: true
+      createSecret: true
+      username: admin
+      passwordHash: $2y$10$sXDYeaz2MiOQDt02ufbmOe8UCKGiggetuohQxn3yjTeNAkrrKcfZi
+    rbac:
+      create: true

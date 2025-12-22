@@ -13,7 +13,7 @@
 - [Урок 5 (№8)](./lesson-05-tracing/README.md): Инфраструктура для Distributed Tracing: Jaeger и аналоги
 - [Урок 6 (№9)](./lesson-06-урок-6/README.md): Урок 6
 - [Урок 7 (№10)](./lesson-07-урок-7/README.md): Урок 7
-- [Урок 8 (№11)](./lesson-08-урок-8/README.md): Урок 8
+- [Урок 8 (№11)](./lesson-08-gitops/README.md): GitOps и инструменты поставки
 - [Урок 9 (№12)](./lesson-09-урок-9/README.md): Урок 9
 - [Урок 10 (№13)](./lesson-10-урок-10/README.md): Урок 10
 - [Урок 11 (№14)](./lesson-11-урок-11/README.md): Урок 11
