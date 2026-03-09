@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name:  example-replicaset
+  namespace: default
+  labels:
+    app:  otus
+spec:
+  selector:
+    matchLabels:
+      app: otus
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: otus
+    spec:
+      containers:
+      - name:  app
+        image: debian:12.2-slim
+        command:
+            - /bin/bash
+            - -c
+            - 'echo "I am pod from ReplicaSet"; while true; do true; done'
