@@ -22,13 +22,17 @@ spec:
     spec:
       containers:
       - name:  app
-        image: debian:12.4-slim
+        image: debian:12.2-slim
         # this container will be exec before start of main container
-        # lifecycle:
-        #   postStart:
-        #     exec:
-        #       command: ["/bin/sh", "-c","echo 'hello from start pod!'> /hello_from_start.txt"]
+        lifecycle:
+          postStart:
+            exec:
+              command: ["/bin/sh", "-c","echo 'hello from start pod!'> /hello_from_start.txt"]
         command:
             - /bin/bash
             - -c
             - 'echo "I am pod from Deployment"; while true; do true; done'
+        # readinessProbe:
+        #   exec:
+        #     command:
+        #       - /bin/false

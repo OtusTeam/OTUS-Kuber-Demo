@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: ReplicaSet
 metadata:
-  name:  example-replicaset
+  name:  example-replicaset-1
   namespace: default
   labels:
     app:  otus
 spec:
   selector:
     matchLabels:
-      app: otus
-  replicas: 2
+      app: otus-1
+  replicas: 3
   template:
     metadata:
       labels:
-        app: otus
+        app: otus-1
     spec:
       containers:
       - name:  app
-        image: debian:12.2-slim
+        image: debian:12.4-slim
         command:
             - /bin/bash
             - -c
