@@ -1,4 +1,4 @@
-# Prometeus
+# Prometheus
 
 ## Установка
 
