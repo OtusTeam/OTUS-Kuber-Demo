@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   tempo:
-    image: grafana/tempo:latest
+    image: grafana/tempo:main-e0e6e6c-amd64
     container_name: tempo
     command: [ "-config.file=/etc/tempo.yaml" ]
     volumes:

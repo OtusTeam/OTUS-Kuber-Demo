@@ -13,7 +13,7 @@
 ```yaml
 data:
   enable-opentelemetry: "true"
-  otlp-collector-host: demo-collector.default.svс
+  otlp-collector-host: demo-collector.default
 ```
 
 4. [OpenTelemtry Operator](https://opentelemetry.io/docs/platforms/kubernetes/operator/#getting-started)
@@ -60,7 +60,7 @@ curl --resolve demo.localdev.me:8080:127.0.0.1 http://demo.localdev.me:8080
 Сделать перенаправление портов на лоальный хост для jaeger, чтобы посмотреть trace
 
 ```bash
-kubectl port-forward --namespace default service/jaeger-query 16686:16686
+kubectl port-forward --namespace default service/jaeger 16686:16686
 ```
 
 ## Дальнейшие настройки

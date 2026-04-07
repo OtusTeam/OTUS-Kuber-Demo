@@ -18,7 +18,7 @@ spec:
         spike_limit_percentage: 15
     exporters:
       otlp/jaeger:
-        endpoint: jaeger-collector:4317
+        endpoint: jaeger:4317
         tls:
           insecure: true
     service:
