@@ -60,4 +60,3 @@ round(sum by (code) (increase(apiserver_request_total{job="apiserver"}[1m])))
 ## Примеры alterts
 
 https://samber.github.io/awesome-prometheus-alerts/rules#postgresql
-
