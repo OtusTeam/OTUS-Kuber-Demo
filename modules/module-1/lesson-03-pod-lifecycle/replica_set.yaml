@@ -17,7 +17,8 @@ spec:
     spec:
       containers:
       - name:  app
-        image: debian:12.4-slim
+        # image: debian:12.4-slim
+        image: debian:12.2-slim
         command:
             - /bin/bash
             - -c
