@@ -1,0 +1,24 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: example-gitlab-project
+  description: An example Backstage component for a GitLab project
+  annotations:
+    gitlab.com/project-slug: your-group/your-project
+    backstage.io/source-location: url:https://gitlab.com/your-group/your-project
+spec:
+  type: service
+  owner: team-a
+  lifecycle: experimental
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: example-api
+  description: An example API
+spec:
+  type: openapi
+  owner: team-a
+  lifecycle: experimental
+  definition:
+    $text: https://gitlab.com/your-group/your-project/-/raw/main/openapi.yaml

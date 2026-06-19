@@ -1,0 +1,26 @@
+# version: "3.8"
+
+services:
+  backstage:
+    build: .
+    env_file: ./config.env
+    container_name: backstage-app
+    networks:
+      - manual_network
+    ports:
+      - "7007:7007" # Backend port
+      - "3000:3000" # Frontend port
+    environment:
+      - LOG_LEVEL=debug
+      - GITLAB_ACCESS_TOKEN=${GITLAB_ACCESS_TOKEN}
+      - K8S_SECRET_TOKEN=${K8S_SECRET_TOKEN}
+    restart: unless-stopped
+    volumes:
+      - ./examples/template/template.yaml:/app/backstage/examples/template/template.yaml:ro
+      - ./examples/org.yaml:/app/backstage/examples/org.yaml:ro
+      - ./examples/entities.yaml:/app/backstage/examples/entities.yaml:ro
+
+networks:
+  manual_network:
+    name: minikube # Имя сети из Docker CLI
+    external: true

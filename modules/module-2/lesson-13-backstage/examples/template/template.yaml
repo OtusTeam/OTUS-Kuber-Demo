@@ -1,0 +1,58 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: gitlab-node-template
+  title: GitLab Node.js Microservice
+  description: Scaffolds a Node.js service and publishes it to GitLab.
+spec:
+  owner: architecture-team
+  type: service
+
+  # Inputs requested from the developer in the Backstage UI
+  parameters:
+    - title: Provide project details
+      required:
+        - name
+        - repoOwner
+      properties:
+        name:
+          title: Repository Name
+          type: string
+          description: Name of the new GitLab repository.
+        repoOwner:
+          title: GitLab Group or Username
+          type: string
+          description: The group, subgroup, or username where the repo will live.
+
+  # The sequential pipeline execution
+  steps:
+    # Step 1: Fetch template skeleton files and replace placeholders
+    - id: fetch-base
+      action: fetch:template
+      input:
+        url: ./content # Location of your template code boilerplate
+        values:
+          name: ${{ parameters.name }}
+
+    # Step 2: Publish the rendered skeleton code to GitLab
+    - id: publish
+      action: publish:gitlab
+      input:
+        repoUrl: "gitlab.com?owner=${{ parameters.repoOwner }}&repo=${{ parameters.name }}"
+        repoVisibility: private
+        defaultBranch: main
+        gitCommitMessage: "chore: initial scaffolding from Backstage template"
+
+    # Step 3: Register the new component in the Backstage Catalog
+    - id: register
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps.publish.output.repoContentsUrl }}
+        catalogInfoPath: "/catalog-info.yaml"
+  output:
+    links:
+      - title: Repository
+        url: ${{ steps['publish'].output.remoteUrl }}
+      - title: Open in catalog
+        icon: catalog
+        entityRef: ${{ steps['register'].output.entityRef }}
