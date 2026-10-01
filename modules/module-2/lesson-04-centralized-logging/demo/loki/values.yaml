@@ -13,12 +13,55 @@ loki:
           period: 24h
         object_store: filesystem # we're storing on filesystem so there's no real persistence here.
         schema: v13
-deploymentMode: SingleBinary
+  pattern_ingester:
+    enabled: true
+  limits_config:
+    allow_structured_metadata: true
+    volume_enabled: true
+  rulerConfig:
+    enable_api: true
+deploymentMode: Monolithic
+
 singleBinary:
   replicas: 1
-read:
-  replicas: 0
+  # minikube's default `standard` storage class is backed by hostPath volumes,
+  # which ignore podSecurityContext.fsGroup. So the PVC mounted at /var/loki
+  # stays owned by root and Loki (uid/gid 10001) fails with
+  # "mkdir /var/loki/rules: permission denied". Fix ownership before Loki starts.
+  initContainers:
+    - name: init-storage-permissions
+      image: busybox:1.36
+      command: ["sh", "-c", "chown -R 10001:10001 /var/loki"]
+      securityContext:
+        runAsUser: 0
+        runAsNonRoot: false
+      volumeMounts:
+        - name: storage
+          mountPath: /var/loki
+# Zero out replica counts of other deployment modes
 backend:
   replicas: 0
+read:
+  replicas: 0
 write:
+  replicas: 0
+ingester:
+  replicas: 0
+querier:
+  replicas: 0
+queryFrontend:
+  replicas: 0
+queryScheduler:
+  replicas: 0
+distributor:
+  replicas: 0
+compactor:
+  replicas: 0
+indexGateway:
+  replicas: 0
+bloomPlanner:
+  replicas: 0
+bloomBuilder:
+  replicas: 0
+bloomGateway:
   replicas: 0

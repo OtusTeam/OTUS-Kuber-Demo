@@ -1,0 +1,21 @@
+# Promtail — log shipper for the PLG demo (DaemonSet on every node).
+#
+# NOTE: promtail is deprecated upstream (successor: Grafana Alloy) and was
+# removed from the current `grafana-community` chart index. The final chart
+# release is still served by the legacy repo URL:
+#
+#   helm repo add grafana-legacy https://grafana.github.io/helm-charts
+#
+# Install (from demo/ directory):
+#   helm upgrade --install promtail grafana-legacy/promtail \
+#     --namespace loki \
+#     --values promtail/values.yaml
+
+config:
+  clients:
+    # Loki (auth_enabled: false) is reached through the gateway of the
+    # `loki` release; no credentials needed.
+    - url: http://loki-gateway.loki.svc.cluster.local/loki/api/v1/push
+
+# Everything else (pod discovery, /var/log mounts, control-plane tolerations)
+# works from chart defaults.

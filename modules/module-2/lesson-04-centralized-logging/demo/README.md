@@ -25,16 +25,43 @@ https://grafana.com/docs/loki/latest/setup/install/helm/install-monolithic/
 
 ```bash
 # Добавляем репозитории Helm
-helm repo add grafana https://grafana.github.io/helm-charts
+helm repo add grafana-community https://grafana-community.github.io/helm-charts
 helm repo update
 
 # Устанавливаем Loki и Grafana
 helm upgrade --install \
-    loki grafana/loki \
+    loki grafana-community/loki  \
     --create-namespace \
-    --namespace logs \
+    --namespace loki \
     --values loki/values.yaml
+
+# Устанавливаем Grafana с преднастроенным Loki datasource
+helm upgrade --install \
+    grafana grafana-community/grafana \
+    --namespace loki \
+    --values grafana/values.yaml
+
+# Promtail удалён из актуального индекса grafana-community (deprecated в пользу Alloy),
+# финальная версия чарта доступна через legacy-репозиторий
+helm repo add grafana-legacy https://grafana.github.io/helm-charts
+
+# Устанавливаем Promtail (DaemonSet, собирает логи всех подов)
+helm upgrade --install \
+    promtail grafana-legacy/promtail \
+    --namespace loki \
+    --values promtail/values.yaml
 ```
+
+> ⚠️ **Важно для minikube (docker driver):** у всех «нод» кластера одно общее ядро хоста,
+> а лимит `fs.inotify.max_user_instances` по умолчанию 128. Три пода promtail суммарно
+> открывают больше inotify-watcher'ов и падают с `too many open files`.
+> Поднимите лимит перед установкой promtail:
+>
+> ```bash
+> minikube ssh "sudo sysctl -w fs.inotify.max_user_instances=1024"
+> ```
+>
+> (значение не переживает перезапуск minikube — при пересоздании кластера повторить)
 
 * Get loki password
     ```bash
@@ -64,15 +91,40 @@ helm upgrade --install \
 
 ## 📊 Доступ к Grafana
 
-```bash
-# Получаем пароль админа
-kubectl get secret grafana -o jsonpath="{.data.admin-password}" | base64 --decode
+Grafana разворачивается с уже настроенным Loki datasource (`grafana/values.yaml`).
 
-# Проброс портов
-kubectl port-forward svc/grafana 3000:80
+```bash
+# Открываем UI (minikube сам откроет браузер)
+minikube service grafana -n loki
+
+# или напрямую: http://<minikube ip>:30300
+minikube ip
+
+# или через port-forward
+kubectl port-forward svc/grafana 3000:80 -n loki
 ```
 
-Grafana будет доступна по адресу: http://localhost:3000
+Логин/пароль: `admin` / `admin` (демо-значения заданы в `grafana/values.yaml`).
+
+## 🔍 Просмотр логов Loki в Grafana
+
+1. Откройте **Explore** → выберите datasource **Loki**
+2. Label browser: `{job="test"}` — тестовые логи, отправленные вручную через API
+3. Через **LogQL** можно фильтровать: `{job="test"} |= "hello"`
+4. Логи, собранные **promtail** (весь кластер): селекторы по меткам
+   - `{pod="loki-0"}` — логи самого Loki
+   - `{namespace="kube-system", container="coredns"}` — логи CoreDNS
+   - `{app="grafana"}` — логи Grafana
+   - метки: `namespace`, `pod`, `container`, `app`, `job`, `node_name`
+
+Отправить тестовые логи в Loki:
+
+```bash
+kubectl run loki-push-test --image=curlimages/curl --restart=Never --rm -it --command -- \
+  curl -s -H "Content-Type: application/json" -XPOST \
+  http://loki-gateway.loki.svc.cluster.local/loki/api/v1/push \
+  --data-raw "{\"streams\": [{\"stream\": {\"job\": \"test\"}, \"values\": [[\"$(date +%s)000000000\", \"hello from PLG demo\"]]}]}"
+```
 
 ## 🔍 Тестирование
 

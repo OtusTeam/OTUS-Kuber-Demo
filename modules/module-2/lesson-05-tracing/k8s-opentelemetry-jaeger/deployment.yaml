@@ -19,5 +19,5 @@ spec:
       serviceAccountName: datacrapper-account
       containers:
         - name: data-scrapper
-          image: windblow/demo-data-scraper:0.1.0
+          image: windblow/k8s-data-scraper:0.2.0
           imagePullPolicy: Always

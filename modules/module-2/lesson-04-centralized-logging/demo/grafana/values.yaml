@@ -1,0 +1,38 @@
+# Grafana with a pre-provisioned Loki datasource for the PLG demo.
+#
+# Install (from demo/ directory):
+#   helm upgrade --install grafana grafana-community/grafana \
+#     --namespace loki --create-namespace \
+#     --values grafana/values.yaml
+
+# Demo-only plaintext credentials. In a real setup omit adminPassword and read
+# the generated one from the `grafana` secret instead.
+adminUser: admin
+adminPassword: admin
+
+# Loki datasource is provisioned automatically, no manual setup in the UI.
+# The gateway routes /loki/* to the single-binary Loki from the loki release.
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Loki
+        uid: loki
+        type: loki
+        access: proxy
+        orgId: 1
+        url: http://loki-gateway.loki.svc.cluster.local
+        isDefault: true
+        editable: true
+
+# NodePort so the UI can be opened without port-forward:
+#   minikube service grafana -n loki
+# (kubectl port-forward svc/grafana 3000:80 also still works)
+service:
+  type: NodePort
+  nodePort: 30300
+
+# No persistence by default — dashboards created in the UI live in an emptyDir
+# and are lost on pod restart. Fine for a demo; import dashboards via the UI.
+persistence:
+  enabled: false
