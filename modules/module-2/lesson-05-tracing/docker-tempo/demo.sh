@@ -1,11 +1,13 @@
 #!/bin/bash
 set -e
 
+source ../common.sh
+
 echo "🚀 Starting Grafana Tempo tracing demo..."
 
-docker-compose down -v 2>/dev/null || true
+docker_compose down -v 2>/dev/null || true
 
-docker-compose up -d
+docker_compose up -d
 
 echo "⏳ Waiting for services to start..."
 sleep 8
@@ -30,4 +32,4 @@ echo "🔍 Open Grafana: http://localhost:3000"
 echo "   Navigate to: Explore → Tempo datasource"
 echo "   Search for service: demo-go-app"
 echo ""
-echo "To stop: docker-compose down"
+echo "To stop: docker_compose down"
