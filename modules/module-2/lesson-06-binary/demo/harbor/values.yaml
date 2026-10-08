@@ -1,0 +1,80 @@
+# Harbor registry for the lesson demo, tuned for a local minikube cluster.
+#
+# Harbor is exposed through our own ingress (../manifests/) with TLS, so both
+# the UI and `docker login` work via a stable hostname:
+#
+#   https://harbor.local  (harbor.local -> minikube IP via /etc/hosts)
+#
+# Install (from demo/ directory):
+#   minikube addons enable ingress
+#   echo "$(minikube ip) harbor.local" | sudo tee -a /etc/hosts
+#
+#   helm repo add harbor https://helm.goharbor.io
+#   helm repo update
+#   helm upgrade --install harbor harbor/harbor \
+#     --namespace harbor --create-namespace \
+#     --values harbor/values.yaml
+#
+#   kubectl apply -f manifests/
+#
+# Full docker login/push flow (CA trust for the docker daemon): see README.md.
+
+# --- Exposure ---------------------------------------------------------------
+# clusterIP: the chart only creates an internal service named "harbor" and no
+# ingress of its own — external access is handled by ../manifests/harbor-ingress.yaml
+# (TLS termination) plus ../manifests/harbor-ui-nodeport.yaml (quick UI access).
+expose:
+  type: clusterIP
+  tls:
+    # TLS is terminated at our ingress with the certificate from
+    # ../manifests/harbor-tls-secret.yaml, so Harbor itself serves plain HTTP.
+    enabled: false
+  clusterIP:
+    name: harbor
+    ports:
+      httpPort: 80
+
+# Must match the hostname the ingress serves:
+#   https://harbor.local
+# A static hostname (unlike the minikube IP) — no --set overrides needed
+# between cluster rebuilds, only the /etc/hosts entry.
+externalURL: https://harbor.local
+
+# --- Persistence ------------------------------------------------------------
+# minikube ships a default dynamic StorageClass ("standard"), so PVCs are
+# provisioned automatically. Sizes are trimmed compared to chart defaults
+# to be gentle on a local cluster.
+persistence:
+  enabled: true
+  persistentVolumeClaim:
+    registry:
+      size: 2Gi
+    jobservice:
+      jobLog:
+        size: 512Mi
+    database:
+      size: 1Gi
+    redis:
+      size: 512Mi
+  # Images and helm charts are stored on the registry PVC (filesystem backend).
+  imageChartStorage:
+    type: filesystem
+    filesystem:
+      rootdirectory: /storage
+
+# --- Demo credentials -------------------------------------------------------
+# Demo-only plaintext password. In a real setup read the generated one from
+# the "harbor-core" secret instead.
+harborAdminPassword: "Harbor12345"
+
+# --- Trimmed-down components ------------------------------------------------
+# Trivy downloads a large vulnerability DB on first start (needs ~1Gi RAM and
+# a 5Gi PVC by default) — disabled to keep the demo light.
+trivy:
+  enabled: true
+
+metrics:
+  enabled: false
+
+trace:
+  enabled: false

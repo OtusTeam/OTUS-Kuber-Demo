@@ -1,0 +1,27 @@
+# Optional: NodePort service for quick UI access without /etc/hosts and TLS —
+#   minikube service harbor-ui -n harbor
+#   # or directly: http://<minikube ip>:30300
+#
+# The docker login/push flow does NOT use it: docker talks to
+# harbor.local:443 through the ingress (harbor-ingress.yaml), because
+# externalURL in harbor/values.yaml is https://harbor.local.
+#
+# Selects the same pods as the chart's "harbor" service (Harbor's own nginx).
+apiVersion: v1
+kind: Service
+metadata:
+  name: harbor-ui
+  namespace: harbor
+  labels:
+    app: harbor
+    component: nginx
+spec:
+  type: NodePort
+  selector:
+    app: harbor
+    component: nginx
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+      nodePort: 30300
